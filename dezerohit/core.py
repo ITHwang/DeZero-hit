@@ -298,3 +298,4 @@ def setup_variable():
     Variable.__truediv__ = div
     Variable.__rtruediv__ = rdiv # operation with other type, the order of args does matter.
     Variable.__pow__ = pow
+    Variable.__getitem__ = dezerohit.functions.get_item

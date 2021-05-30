@@ -4,7 +4,7 @@ from dezerohit import utils
 from dezerohit.core import Function, Variable, as_variable, as_array
 
 # ========================================================
-# Basic functions: sin / cos / tanh
+# Basic functions: sin / cos / tanh / exp / log
 # ========================================================
 
 class Sin(Function):
@@ -46,8 +46,34 @@ class Tanh(Function):
 def tanh(x):
     return Tanh()(x)
 
+class Exp(Function):
+    def forward(self, x):
+        y = np.exp(x)
+        return y
+    
+    def backward(self, gy):
+        y = self.outputs[0]() # weakref
+        gx = gy * y
+        return gx
+
+def exp(x):
+    return Exp()(x)
+
+class Log(Function):
+    def forward(self, x):
+        y = np.log(x)
+        return y
+    
+    def backward(self, gy):
+        x, = self.inputs
+        gx = gy / x
+        return gx
+
+def log(x):
+    return Log()(x)
+
 # ========================================================
-# Tensor operations: reshape / transpose
+# Tensor operations: reshape / transpose / get_item
 # ========================================================
 
 class Reshape(Function):
@@ -85,6 +111,38 @@ class Transpose(Function):
 
 def transpose(x, axes=None):
     return Transpose(axes)(x)
+
+class GetItem(Function):
+    def __init__(self, slices):
+        self.slices = slices
+    
+    def forward(self, x):
+        y = x[self.slices]
+        return y
+    
+    def backward(self, gy):
+        x, = self.inputs
+        f = GetItemGrad(self.slices, x.shape)
+        return f(gy)
+
+class GetItemGrad(Function):
+    def __init__(self, slices, in_shape):
+        self.slices = slices
+        self.in_shape = in_shape
+    
+    def forward(self, gy):
+        gx = np.zeros(self.in_shape)
+        np.add.at(gx, self.slices, gy)
+        return gx
+    
+    def backward(self, ggx):
+        return get_item(ggx, self.slices)
+
+def get_item(x, slices):
+    f = GetItem(slices)
+    return f(x)
+
+
 
 # ========================================================
 # sum / sum_to / broadcast_to / matmul / linear
@@ -176,7 +234,7 @@ def linear(x, W, b=None):
     return Linear()(x, W, b)
 
 # ========================================================
-# activation function: sigmoid / 
+# activation function: sigmoid / softmax
 # ========================================================
 
 class Sigmoid(Function):
@@ -191,6 +249,13 @@ class Sigmoid(Function):
 
 def sigmoid(x):
     return Sigmoid()(x)
+
+def softmax_simple(x, axis=1):
+    x = as_variable(x)
+    y = exp(x)
+    sum_y = sum(y, axis=axis, keepdims=True)
+    return y / sum_y
+
 
 # ========================================================
 # loss function: mean_squared_error
