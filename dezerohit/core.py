@@ -2,6 +2,7 @@ import weakref
 import numpy as np
 import contextlib
 import dezerohit
+import heapq
 
 # ==================================================
 # Config
