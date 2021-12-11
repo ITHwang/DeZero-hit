@@ -4,9 +4,21 @@ from dezerohit import utils
 from dezerohit.core import Function, Variable, as_variable, as_array
 
 # ========================================================
-# Basic functions: sin / cos / tanh / exp / log
+# Basic functions: square / sin / cos / tanh / exp / log
 # ========================================================
 
+class Square(Function):
+    def forward(self, x):
+        y = np.square(x)
+        return y
+    
+    def backward(self, gy):
+        (x,) = self.inputs
+        gx = 2 * x * gy
+        return gx
+
+def square(x):
+    return Square()(x)
 
 class Sin(Function):
     def forward(self, x):

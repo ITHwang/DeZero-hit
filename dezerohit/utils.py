@@ -1,5 +1,10 @@
 import os
 import subprocess
+import urllib.request
+import numpy as np
+from dezerohit import as_variable
+from dezerohit import Variable
+# from dezerohit import cuda
 
 # ===========================================================
 # Visualize for computational graph
@@ -145,3 +150,38 @@ def reshape_sum_backward(gy, x_shape, axis, keepdims):
     
     gy = gy.reshape(shape)
     return gy
+
+# ===========================================================
+# Gradient check
+# ===========================================================
+
+def gradient_check(f, x):
+    x = as_variable(x)
+    y = f(x)
+    y.backward()
+    num_grad = numerical_diff(f, x)
+    flg = np.allclose(x.grad.data, num_grad)
+
+    if not flg:
+        print('')
+        print('========== FAILED (Gradient Check) ==========')
+
+        print('Numerical Grad')
+        print(f' shape: {num_grad.shape}')
+        val = str(num_grad.flatten()[:10])
+        print(f' values: {val[1:-1]} ...')
+
+        print('Backprop Grad')
+        print(f' shape: {x.grad.shape}')
+        val = str(x.grad.data.flatten()[:10])
+        print(f' values: {val[1:-1]} ...')
+    return flg
+
+def numerical_diff(f, x, eps=1e-4):
+    x0 = Variable(x.data - eps)
+    x1 = Variable(x.data + eps)
+    y0 = f(x0)
+    y1 = f(x1)
+    return (y1.data - y0.data) / (2 * eps)
+    
+
