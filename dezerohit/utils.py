@@ -155,14 +155,37 @@ def reshape_sum_backward(gy, x_shape, axis, keepdims):
 # Gradient check
 # ===========================================================
 
-def gradient_check(f, x):
+def gradient_check(f, x, *args, rtol=1e-4, atol=1e-5, **kwargs):
+    """Test backward procedure of a given function.
+    This automatically checks the backward-process of a given function. For
+    checking the correctness, this function compares gradients by
+    backprop and ones by numerical derivation. If the result is within a
+    tolerance this function return True, otherwise False.
+    Args:
+        f (callable): A function which gets `Variable`s and returns `Variable`s.
+        x (`ndarray` or `dezero.Variable`): A traget `Variable` for computing
+            the gradient.
+        *args: If `f` needs variables except `x`, you can specify with this
+            argument.
+        rtol (float): The relative tolerance parameter.
+        atol (float): The absolute tolerance parameter.
+        **kwargs: If `f` needs keyword variables, you can specify with this
+            argument.
+    Returns:
+        bool: Return True if the result is within a tolerance, otherwise False.
+    """
     x = as_variable(x)
-    y = f(x)
-    y.backward()
-    num_grad = numerical_diff(f, x)
-    flg = np.allclose(x.grad.data, num_grad)
+    x.data = x.data.astype(np.float64)
 
-    if not flg:
+    num_grad = numerical_grad(f, x, *args, **kwargs)
+    y = f(x, *args, **kwargs)
+    y.backward()
+    bp_grad = x.grad.data
+
+    assert bp_grad.shape == num_grad.shape
+    res = np.allclose(x.grad.data, num_grad, atol=atol, rtol=rtol)
+
+    if not res:
         print('')
         print('========== FAILED (Gradient Check) ==========')
 
@@ -175,13 +198,27 @@ def gradient_check(f, x):
         print(f' shape: {x.grad.shape}')
         val = str(x.grad.data.flatten()[:10])
         print(f' values: {val[1:-1]} ...')
-    return flg
+    return res
 
-def numerical_diff(f, x, eps=1e-4):
+def numerical_grad(f, x, *args, **kwargs):
+    """Computes numerical gradient by finite differences.
+    Args:
+        f (callable): A function which gets `Variable`s and returns `Variable`s.
+        x (`ndarray` or `dezero.Variable`): A target `Variable` for computing
+            the gradient.
+        *args: If `f` needs variables except `x`, you can specify with this
+            argument.
+        **kwargs: If `f` needs keyword variables, you can specify with this
+            argument.
+    Returns:
+        `ndarray`: Gradient.
+    """
+    eps = 1e-4
+
     x0 = Variable(x.data - eps)
     x1 = Variable(x.data + eps)
-    y0 = f(x0)
-    y1 = f(x1)
+    y0 = f(x0, *args, **kwargs)
+    y1 = f(x1, *args, **kwargs)
     return (y1.data - y0.data) / (2 * eps)
     
 
