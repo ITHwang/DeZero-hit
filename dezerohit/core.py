@@ -104,7 +104,7 @@ class Variable:
             f = heapq.heappop(funcs)[1]
             gys = [output().grad for output in f.outputs]  # Output is weakref.
 
-            # f.backward(*gys) and gradient addition call Function().__call__ and it refers Config.enable_backprop
+            # f.backward(*gys) and gradient addition call Function().__call__ and refer Config.enable_backprop
             with using_config("enable_backprop", create_graph):
                 gxs = f.backward(*gys)  # unpacking
                 if not isinstance(gxs, tuple):  # Type of outputs should be tuple or list.
@@ -345,17 +345,17 @@ def setup_variable():
     [ y = add(mul(a, b), c) ] => [ y = a * b + c ]
     """
     Variable.__add__ = add
-    # operation with other type, the order of args doesn't matter.
-    Variable.__radd__ = add
     Variable.__mul__ = mul
-    # operation with other type, the order of args doesn't matter.
-    Variable.__rmul__ = mul
     Variable.__neg__ = neg
     Variable.__sub__ = sub
-    # operation with other type, the order of args does matter.
-    Variable.__rsub__ = rsub
-    Variable.__truediv__ = div
-    # operation with other type, the order of args does matter.
-    Variable.__rtruediv__ = rdiv
     Variable.__pow__ = pow
+    Variable.__truediv__ = div
     Variable.__getitem__ = dezerohit.functions.get_item
+
+    # operation with other type
+    # the order of args doesn't matter.
+    Variable.__radd__ = add
+    Variable.__rmul__ = mul
+    Variable.__rsub__ = rsub
+    Variable.__rtruediv__ = rdiv
+
