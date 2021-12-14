@@ -33,7 +33,8 @@ def no_grad():
 
 
 class Variable:
-    __array_priority__ = 200  # operation with ndarray instance
+    # Variable should have priority about calling magic method, when operated with ndarray instance
+    __array_priority__ = 200  
 
     def __init__(self, data, name=None):
         if data is not None:

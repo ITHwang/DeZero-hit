@@ -5,6 +5,32 @@ from dezerohit import Variable
 from dezerohit.utils import gradient_check
 import dezerohit.functions as F
 
+class TestNeg(unittest.TestCase):
+    
+    def test_change_sign_of_Variable_when_forward(self):
+        x = Variable(np.array([1, 2, 3]))
+        y = -x
+        res = y.data
+        expected = np.array([-1, -2, -3])
+        self.assertTrue(array_equal(res, expected))
+    
+    def test_change_sign_of_numpy_when_forward(self):
+        x = np.array([1, 2, 3])
+        y = -x
+        res = y.data
+        expected = np.array([-1, -2, -3])
+        self.assertTrue(array_equal(res, expected))
+    
+    def test_change_sign_of_Variable_when_backward(self):
+        x = Variable(np.random.randn(3, 3))
+        f = lambda x: -x
+        self.assertTrue(gradient_check(f, x))
+
+    def test_change_sign_of_numpy_when_backward(self):
+        x = Variable(np.random.randn(5, 5))
+        f = lambda x: -x
+        self.assertTrue(gradient_check(f, x))
+
 class TestAdd(unittest.TestCase):
 
     def test_forward1(self):
