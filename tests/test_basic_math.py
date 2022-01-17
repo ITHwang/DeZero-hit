@@ -1,3 +1,7 @@
+if '__file__' in globals():
+    import os, sys
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 import unittest
 import numpy as np
 from numpy.core.numeric import array_equal
@@ -33,7 +37,7 @@ class TestNeg(unittest.TestCase):
 
 class TestAdd(unittest.TestCase):
 
-    def test_forward1(self):
+    def test_add_ndarray_variable_forward(self):
         x0 = np.array([1, 2, 3])
         x1 = Variable(np.array([1, 2, 3]))
         y = x0 + x1
@@ -41,19 +45,19 @@ class TestAdd(unittest.TestCase):
         expected = np.array([2, 4, 6])
         self.assertTrue(array_equal(res, expected))
 
-    def test_backward1(self):
+    def test_add_variable_ndarray_backward1(self):
         x = Variable(np.random.randn(3, 3))
         y = np.random.randn(3, 3)
         f = lambda x, y: x + y
         self.assertTrue(gradient_check(f, x, y))
 
-    def test_backward2(self):
+    def test_add_variable_ndarray_backward2(self):
         x = Variable(np.random.randn(3, 3))
         y = np.random.randn(3, 1)
         f = lambda x, y: x + y
         self.assertTrue(gradient_check(f, x, y))
 
-    def test_backward3(self):
+    def test_add_numpy_numpy_backward(self):
         x = np.random.randn(3, 3)
         y = np.random.randn(3, 1)
         f = lambda x, y: x + y
@@ -61,7 +65,7 @@ class TestAdd(unittest.TestCase):
 
 class TestMul(unittest.TestCase):
 
-    def test_forward1(self):
+    def test_mul_ndarray_variable_forward(self):
         x0 = np.array([1, 2, 3])
         x1 = Variable(np.array([1, 2, 3]))
         y = x0 * x1
@@ -69,53 +73,76 @@ class TestMul(unittest.TestCase):
         expected = np.array([1, 4, 9])
         self.assertTrue(array_equal(res, expected))
 
-    def test_backward1(self):
+    def test_mul_ndarray_ndarray_backward1(self):
         x = np.random.randn(3, 3)
         y = np.random.randn(3, 3)
-        f = lambda x: x * y
-        self.assertTrue(gradient_check(f, x))
+        f = lambda x, y: x * y
+        self.assertTrue(gradient_check(f, x, y))
 
-    def test_backward2(self):
+    def test_mul_ndarray_ndarray_backward2(self):
         x = np.random.randn(3, 3)
         y = np.random.randn(3, 1)
-        f = lambda x: x * y
-        self.assertTrue(gradient_check(f, x))
+        f = lambda x, y: x * y
+        self.assertTrue(gradient_check(f, x, y))
 
-    def test_backward3(self):
+    def test_mul_ndarray_ndarray_backward3(self):
         x = np.random.randn(3, 3)
         y = np.random.randn(3, 1)
-        f = lambda y: x * y
-        self.assertTrue(gradient_check(f, x))
+        f = lambda x, y: x * y
+        self.assertTrue(gradient_check(f, x, y))
 
 class TestExp(unittest.TestCase):
 
-    def test_forward1(self):
+    def test_exp_variable_forward(self):
         x = Variable(np.array([1, 2, 3]))
         y = F.exp(x)
         expected = np.exp(x.data)
         self.assertTrue(array_equal(y.data, expected))
     
-    def test_backward1(self):
+    def test_exp_variable_backward1(self):
         x = Variable(np.random.randn(3, 3))
         self.assertTrue(gradient_check(F.exp, x))
 
-    def test_backward2(self):
+    def test_exp_variable_backward2(self):
         x = Variable(np.random.randn(3))
         self.assertTrue(gradient_check(F.exp, x))
 
 class TestSquare(unittest.TestCase):
 
-    def test_forward1(self):
+    def test_square_variable_forward(self):
         x = Variable(np.array([1, 2, 3]))
         y = F.square(x)
         expected = np.array([1, 4, 9])
         self.assertTrue(array_equal(y.data, expected))
     
-    def test_backward1(self):
+    def test_square_variable_backward1(self):
         x = Variable(np.random.randn(3, 3))
         self.assertTrue(gradient_check(F.square, x))
 
-    def test_backward2(self):
+    def test_square_variable_backward2(self):
         x = Variable(np.random.randn(3))
         self.assertTrue(gradient_check(F.square, x))
 
+class TestSub(unittest.TestCase):
+
+    def test_sub_variable_ndarray_forward(self):
+        x0 = Variable(np.array([4, 5, 6]))
+        x1 = np.array([1, 2, 3])
+        return x0 - x1
+    
+    def test_sub_ndarray_variable_forward(self):
+        x0 = np.array([1, 2, 3])
+        x1 = Variable(np.array([4, 5, 6]))
+        return x0 - x1
+
+    def test_sub_ndarray_variable_backward(self):
+        x0 = np.random.randn(3, 3)
+        x1 = Variable(np.random.randn(3, 3))
+        f = lambda x, y: x - y    
+        self.assertTrue(gradient_check(f, x0, x1))
+
+    def test_sub_variable_ndarray_backward(self):
+        x0 = Variable(np.random.randn(3, 3))
+        x1 = np.random.randn(3, 3)
+        f = lambda x, y: x - y    
+        self.assertTrue(gradient_check(f, x0, x1))
