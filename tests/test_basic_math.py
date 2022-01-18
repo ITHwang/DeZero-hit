@@ -128,12 +128,16 @@ class TestSub(unittest.TestCase):
     def test_sub_variable_ndarray_forward(self):
         x0 = Variable(np.array([4, 5, 6]))
         x1 = np.array([1, 2, 3])
-        return x0 - x1
+        result = (x0 - x1).data
+        expected = np.array([3, 3, 3])
+        return self.assertTrue(array_equal(expected, result))
     
     def test_sub_ndarray_variable_forward(self):
         x0 = np.array([1, 2, 3])
         x1 = Variable(np.array([4, 5, 6]))
-        return x0 - x1
+        result = (x0 - x1).data
+        expected = np.array([-3, -3, -3])
+        return self.assertTrue(array_equal(expected, result))
 
     def test_sub_ndarray_variable_backward(self):
         x0 = np.random.randn(3, 3)
@@ -146,3 +150,58 @@ class TestSub(unittest.TestCase):
         x1 = np.random.randn(3, 3)
         f = lambda x, y: x - y    
         self.assertTrue(gradient_check(f, x0, x1))
+
+class TestDiv(unittest.TestCase):
+
+    def test_div_variable_ndarray_forward(self):
+        x0 = Variable(np.array([4, 5, 6]))
+        x1 = np.array([1, 2, 3])
+        result = (x0 / x1).data
+        expected = np.array([4/1, 5/2, 6/3])
+        return self.assertTrue(array_equal(result, expected))
+    
+    def test_div_ndarray_variable_forward(self):
+        x0 = np.array([1, 2, 3])
+        x1 = Variable(np.array([4, 5, 6]))
+        result = (x0 / x1).data
+        expected = np.array([1/4, 2/5, 3/6])
+        return self.assertTrue(array_equal(result, expected))
+
+    def test_div_ndarray_variable_backward(self):
+        x0 = np.random.randn(3, 3)
+        x1 = Variable(np.random.randn(3, 3))
+        f = lambda x, y: x / y    
+        self.assertTrue(gradient_check(f, x0, x1))
+
+    def test_div_variable_ndarray_backward(self):
+        x0 = Variable(np.random.randn(3, 3))
+        x1 = np.random.randn(3, 3)
+        f = lambda x, y: x / y    
+        self.assertTrue(gradient_check(f, x0, x1))
+
+class TestPow(unittest.TestCase):
+
+    def test_pow_variable_forward(self):
+        x = Variable(np.array([4, 5, 6]))
+        result = (x**2).data
+        expected = np.array([16, 25, 36])
+        return self.assertTrue(array_equal(result, expected))
+    
+    def test_pow_variable_forward2(self):
+        x = np.array([1, 2, 3])
+        result = (x**3).data
+        expected = np.array([1, 8, 27])
+        return self.assertTrue(array_equal(result, expected))
+
+    def test_pow_variable_backward(self):
+        x = Variable(np.random.randn(3, 3))
+        f = lambda x: x**2    
+        self.assertTrue(gradient_check(f, x))
+
+    def test_pow_variable_backward2(self):
+        x = Variable(np.random.randn(5, 5))
+        f = lambda x: x**3    
+        self.assertTrue(gradient_check(f, x))
+    
+
+
