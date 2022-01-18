@@ -91,38 +91,6 @@ class TestMul(unittest.TestCase):
         f = lambda x, y: x * y
         self.assertTrue(gradient_check(f, x, y))
 
-class TestExp(unittest.TestCase):
-
-    def test_exp_variable_forward(self):
-        x = Variable(np.array([1, 2, 3]))
-        y = F.exp(x)
-        expected = np.exp(x.data)
-        self.assertTrue(array_equal(y.data, expected))
-    
-    def test_exp_variable_backward1(self):
-        x = Variable(np.random.randn(3, 3))
-        self.assertTrue(gradient_check(F.exp, x))
-
-    def test_exp_variable_backward2(self):
-        x = Variable(np.random.randn(3))
-        self.assertTrue(gradient_check(F.exp, x))
-
-class TestSquare(unittest.TestCase):
-
-    def test_square_variable_forward(self):
-        x = Variable(np.array([1, 2, 3]))
-        y = F.square(x)
-        expected = np.array([1, 4, 9])
-        self.assertTrue(array_equal(y.data, expected))
-    
-    def test_square_variable_backward1(self):
-        x = Variable(np.random.randn(3, 3))
-        self.assertTrue(gradient_check(F.square, x))
-
-    def test_square_variable_backward2(self):
-        x = Variable(np.random.randn(3))
-        self.assertTrue(gradient_check(F.square, x))
-
 class TestSub(unittest.TestCase):
 
     def test_sub_variable_ndarray_forward(self):
@@ -202,6 +170,3 @@ class TestPow(unittest.TestCase):
         x = Variable(np.random.randn(5, 5))
         f = lambda x: x**3    
         self.assertTrue(gradient_check(f, x))
-    
-
-
