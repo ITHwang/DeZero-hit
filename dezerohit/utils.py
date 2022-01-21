@@ -27,13 +27,15 @@ def _dot_func(f):
     ret = dot_func.format(id(f), f.__class__.__name__)
 
     dot_edge = '{} -> {}\n'
+
+    # TODO1: refactoring
     for x in f.inputs:
         ret += dot_edge.format(id(x), id(f))
     for y in f.outputs:
         ret += dot_edge.format(id(f), id(y())) # y is weak reference.
     return ret
 
-# similar to backward()
+# write DOT texts tracking backward path of last output.
 def get_dot_graph(output, verbose=True):
     """Generates a graphviz DOT text of a computational graph.
     Build a graph of functions and variables backward-reachable from the
@@ -55,7 +57,7 @@ def get_dot_graph(output, verbose=True):
 
     def add_func(f):
         if f not in seen_set:
-            funcs.append(f) # There's no need to sort func unlike backward()
+            funcs.append(f) # unlike backward(), no need to sort funcs 
             seen_set.add(f)
     
     add_func(output.creator)
