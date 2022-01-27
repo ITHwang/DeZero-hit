@@ -28,7 +28,6 @@ def _dot_func(f):
 
     dot_edge = '{} -> {}\n'
 
-    # TODO1: refactoring
     for x in f.inputs:
         ret += dot_edge.format(id(x), id(f))
     for y in f.outputs:

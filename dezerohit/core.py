@@ -96,13 +96,13 @@ class Variable:
 
         def add_func(f):
             if f not in seen_set:
-                heapq.heappush(funcs, (-f.generation, f))
+                heapq.heappush(funcs, (-f.generation, id(f), f)) # if f.gen is not unique, compare id of func object. 
                 seen_set.add(f)
 
         add_func(self.creator)
 
         while funcs:
-            f = heapq.heappop(funcs)[1]
+            f = heapq.heappop(funcs)[2]
             gys = [output().grad for output in f.outputs]  # Output is weakref.
 
             # f.backward(*gys) and gradient addition call Function().__call__ and refer Config.enable_backprop
